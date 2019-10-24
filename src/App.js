@@ -56,7 +56,7 @@ class App extends React.Component {
         return {
           card: prevState.card.slice(1),
           day: prevState.day - 1
-        } 
+        }
       }
       
     });
@@ -73,6 +73,7 @@ class App extends React.Component {
           <h1>Total: {this.state.day}</h1>
           <button onClick={this.takeStepForward} >Step {1}</button>
           <button onClick={this.takeStepBackward} >Step Backward</button>
+          <button  >Reflect</button>
           {this.state.card.reverse().map( item => <Card day={item.day}/>)}
         </div>
       );
