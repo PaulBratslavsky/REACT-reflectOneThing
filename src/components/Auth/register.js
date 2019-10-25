@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, Form, Segment, Button, Header, Message, Icon } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import firebase from '../../firebase';
+import md5 from 'md5';
 
 class Register extends React.Component {
 
@@ -12,6 +13,7 @@ class Register extends React.Component {
         passwordConfirmation: '',
         errors: [],
         loading: false,
+        usersRef: firebase.database().ref('users')
     }
 
     handleChange = event => this.setState({ [event.target.name]: event.target.value});
@@ -82,29 +84,56 @@ class Register extends React.Component {
             .createUserWithEmailAndPassword(this.state.email, this.state.password)
             .then( createdUser => {
                 console.log(createdUser);
-                this.setState({
-                    username: '',
-                    email: '',
-                    password: '',
-                    passwordConfirmation: '',
-                    loading: false
+                createdUser.user.updateProfile({
+                    displayName: this.state.username,
+                    photoURL: `http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=identicon`
                 })
+                .then( () => {
+                    this.saveUser(createdUser).then( () => {
+                        // add new user to database
+                        console.log('user saved')
+                    })
+                    this.setState({
+                        username: '',
+                        email: '',
+                        password: '',
+                        passwordConfirmation: '',
+                        loading: false
+                    })
+                })
+                .catch( (error) => {
+                    console.log(error);
+                    this.setState({
+                        errors: this.state.errors.concat(error),
+                        loading: false
+                    });
+                })
+
             })
             .catch( error => {
                 console.error(error);
                 this.setState({ errors: this.state.errors.concat(error), loading: false })
             });
         }
+
         
     }
+
+    saveUser = (createdUser) => {
+        return this.state.usersRef.child(createdUser.user.uid).set({
+            name: createdUser.user.displayName,
+            avatar: createdUser.user.photoURL
+        });
+    }
+
     render() {
 
         const { username, email, password, passwordConfirmation, errors, loading } = this.state;
         return(
             <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
                 <Grid.Column style={{ maxWidth: 450 }}>
-                <Header as='h2' color='teal' textAlign='center'>
-                    <Icon name="adjust" /> Register a new account
+                <Header as='h1' color='teal' textAlign='center'>
+                    <Icon name="adjust" /> Sign Up for 1R
                 </Header>
                 <Form onSubmit={this.handleSubmit} size='large'>
                     <Segment stacked>
