@@ -1,4 +1,58 @@
 import React from 'react';
+
+import Navigation from './components/Navigation/Navigation';
+import Journals from './components/Journals/Journals';
+import PublicForum from './components/PublicForum/PublicForum';
+
+import { connect } from 'react-redux';
+
+
+class App extends React.Component {
+    
+  state = { activeItem: 'journals' }
+
+  handleItemClick = (e, { name }) => { 
+    console.log(name, 'from handle click');
+    this.setState({ activeItem: name })
+  }
+
+  
+  render() {
+
+    console.log(this.props, "From props all ");
+
+    const { activeItem } = this.state;
+    return (
+      <div>
+        <Navigation 
+          handleItemClick={this.handleItemClick} 
+          activeItem={this.state.activeItem} 
+          currentUser={this.props.currentUser}
+        />
+      
+        { activeItem === 'journals' && <Journals /> }
+        { activeItem === 'forum' && <PublicForum /> }
+        
+      </div>
+      )
+  }
+}
+
+const mapStateToProps = (state) => {
+  console.log(state, 'from map state');
+  return {
+    currentUser: state.user.currentUser
+  }
+}
+
+export default connect(mapStateToProps)(App)
+
+
+
+/* 
+
+
+import React from 'react';
 import { FaRegPlusSquare } from 'react-icons/fa';
 
 const data = [
@@ -86,3 +140,7 @@ class App extends React.Component {
 }
 
 export default App;
+
+
+
+*/
